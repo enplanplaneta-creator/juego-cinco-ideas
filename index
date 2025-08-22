@@ -1,1 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cinco ideas para entender la crisis climática · Quiz gamificado</title>
+<style>
+  :root{
+    --bg1:#0b132b; --bg2:#1c2541; --bg3:#3a506b; --card:#0f172acc; --glass:#0b1220aa;
+    --text:#e5e7eb; --muted:#9ca3af; --accent:#00d4ff; --accent2:#ff6b6b; --ok:#22c55e; --bad:#ef4444;
+    --gold:#f59e0b; --shadow:0 10px 30px rgba(0,0,0,.25);
+  }
+  *{box-sizing:border-box}
+  html,body,#app{height:100%}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;color:var(--text);
+       background: radial-gradient(1200px 600px at 10% -10%, #0b132b 10%, transparent 60%),
+                   radial-gradient(1000px 600px at 110% 10%, #1c2541 10%, transparent 60%),
+                   linear-gradient(135deg,var(--bg1),var(--bg2));}
+  a{color:var(--accent)}
+
+  /* Header */
+  header{
+    position:sticky; top:0; z-index:5; backdrop-filter:saturate(1.2) blur(6px);
+    background:linear-gradient(90deg,#103,#301), linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .container{max-width:1100px;margin:0 auto;padding:16px}
+  .title{display:flex;gap:14px;align-items:center}
+  .logo{width:42px;height:42px;border-radius:10px;flex:0 0 auto;background:
+        repeating-linear-gradient(90deg,#1e3a8a 0 12px,#2563eb 12px 24px,#60a5fa 24px 36px,#fca5a5 36px 48px,#ef4444 48px 60px);
+        box-shadow:0 4px 14px rgba(0,0,0,.25)}
+  h1{margin:0;font-size:clamp(18px,2.5vw,24px)}
+  .subtitle{color:var(--muted);font-size:12px;margin-top:2px}
+
+  /* Progress */
+  .progress{margin-top:10px;height:10px;border-radius:999px;background:#111827;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+  .bar{height:100%;width:0%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),#a7f3d0)}
+  .steps{display:flex;gap:8px;margin-top:10px}
+  .dot{width:20px;height:20px;border-radius:999px;background:#0b1220;border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;font-size:12px;color:#9ca3af}
+  .dot.done{background:linear-gradient(180deg,#065f46,#0ea5e9); color:white; border-color:transparent}
+
+  /* Main layout */
+  main{max-width:1100px;margin:18px auto 90px;padding:0 16px}
+  .card{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:16px;box-shadow:var(--shadow)}
+  .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;padding:22px}
+  .hero h2{margin:.2rem 0 .5rem;font-size:clamp(20px,4vw,28px)}
+  .meta{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+  .pill{padding:6px 10px;border:1px solid rgba(255,255,255,.15);border-radius:999px;background:rgba(255,255,255,.03)}
+  .btn{cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:8px;border:none;border-radius:12px;padding:12px 14px;font-weight:600;color:#0b1220;background:linear-gradient(90deg,#7dd3fc,#a7f3d0);box-shadow:0 10px 20px rgba(0,0,0,.25)}
+  .btn.secondary{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.18)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+
+  /* Step sections */
+  .step{display:none;margin-top:16px}
+  .step.active{display:block}
+  .step h3{margin:0 0 6px;font-size:clamp(18px,3.2vw,22px)}
+  .step .lead{color:var(--muted);margin:0 0 16px}
+
+  /* GAME 1 — Drag & Drop Tiempo vs Clima */
+  .dnd{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+  .bank{grid-column:1 / -1;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+  .draggable{padding:10px 12px;border:1px dashed rgba(255,255,255,.22);border-radius:12px;background:rgba(255,255,255,.04);cursor:grab}
+  .zones{grid-column:1 / -1;display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .zone{min-height:120px;border:2px dashed rgba(255,255,255,.2);border-radius:14px;padding:12px;background:rgba(255,255,255,.03)}
+  .zone h4{margin:0 0 8px;font-size:14px;color:#cbd5e1}
+  .zone.correct{border-color:#22c55e}
+  .zone.wrong{border-color:#ef4444}
+
+  /* GAME 2 — Emparejar conceptos */
+  .match{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .list{display:grid;gap:10px}
+  .item{padding:10px 12px;border:1px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(255,255,255,.04);cursor:pointer}
+  .item.active{outline:2px solid var(--accent)}
+  .item.matched{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.5)}
+
+  /* GAME 3 — Quiz clásico */
+  .quiz{display:grid;gap:14px}
+  .q{padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.03)}
+  .q h4{margin:0 0 8px}
+  .opt{display:flex;gap:8px;align-items:center;margin:5px 0;color:#cbd5e1}
+  .mark{display:inline-block;width:10px;height:10px;border-radius:999px;margin-left:8px}
+
+  /* GAME 4 — Memory (ocultar hasta pulsar + matched destacado) */
+  .grid{display:grid;grid-template-columns:repeat(4, minmax(70px, 1fr));gap:12px}
+  .cardM{aspect-ratio:1/1.25;position:relative;transform-style:preserve-3d;transition:transform .45s;cursor:pointer}
+  .cardM .face{position:absolute;inset:0;border-radius:12px;display:grid;place-items:center;border:2px solid rgba(255,255,255,.15);backface-visibility:hidden;overflow:hidden}
+  .cardM .front{background:linear-gradient(180deg,#111827,#0b1220)}
+  .cardM .back{background:linear-gradient(180deg,#0f766e,#0ea5e9);transform:rotateY(180deg);padding:8px;text-align:center}
+  .cardM.flipped{transform:rotateY(180deg)}
+  /* Cambios sustanciales al emparejar */
+  .cardM.matched{opacity:1; cursor:default; pointer-events:none; transform:rotateY(180deg)}
+  .cardM.matched .front, .cardM.matched .back{background:linear-gradient(180deg,#14532d,#16a34a); border-color:rgba(34,197,94,.85); color:#ffffff}
+  .cardM.matched::after{content:'✓'; position:absolute; right:8px; bottom:8px; width:28px; height:28px; border-radius:999px; display:grid; place-items:center; font-weight:900; background:#22c55e; color:#0b1220; box-shadow:0 2px 8px rgba(0,0,0,.45)}
+
+  /* GAME 5 — Dos verdades y un bulo */
+  .tvb{display:grid;gap:12px}
+  .roundBox{padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.03)}
+  .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px}
+  .choice{padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.04);cursor:pointer; color:#fff}
+  .choice.correct{outline:2px solid var(--ok); background:rgba(34,197,94,.18)}
+  .choice.wrong{outline:2px solid var(--bad); background:rgba(239,68,68,.18)}
+
+  /* Footer / Nav */
+  .nav{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
+  .badge{display:inline-flex;gap:6px;align-items:center;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);font-size:13px;color:#cbd5e1}
+
+  /* Toasts & Confetti */
+  .toast{position:fixed;right:16px;bottom:16px;background:#111827;border:1px solid rgba(255,255,255,.14);padding:10px 12px;border-radius:12px;box-shadow:var(--shadow);display:none}
+  .toast.show{display:block}
+  .confetti{position:fixed;top:-10px;width:8px;height:14px;opacity:.9;animation:fall 2.4s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+  /* Responsive */
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="container">
+      <div class="title">
+        <div class="logo" aria-hidden="true" title="#ShowYourStripes"></div>
+        <div>
+          <h1>“Cinco ideas para entender la crisis climática” · Quiz gamificado</h1>
+          <div class="subtitle">Basado en la Cuñadopedia Vol. II: Cambio Climático · 5 apartados · estilos de juego variados</div>
+        </div>
+      </div>
+      <div class="progress" aria-label="Progreso">
+        <div class="bar" id="bar"></div>
+      </div>
+      <div class="steps" id="steps">
+        <div class="dot" data-i="0">1</div>
+        <div class="dot" data-i="1">2</div>
+        <div class="dot" data-i="2">3</div>
+        <div class="dot" data-i="3">4</div>
+        <div class="dot" data-i="4">5</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero card" aria-labelledby="intro-h">
+      <div>
+        <h2 id="intro-h">¿List@ para jugar y aprender?</h2>
+        <p class="lead">Cinco ideas, cinco minijuegos: <strong>1) Es real</strong>, <strong>2) Somos nosotras</strong>, <strong>3) Consenso científico</strong>, <strong>4) Es mala</strong> y <strong>5) Hay esperanza</strong>. Supera cada reto para ganar puntos y desbloquear tu <em>badge</em> de <strong>Aliado/a del Clima</strong>.</p>
+        <div class="meta">
+          <span class="pill">Duración: 10–15 min</span>
+          <span class="pill">Dificultad: 🌱 Fácil–Media</span>
+          <span class="pill">Modo: Individual / Aula</span>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn" id="start">Comenzar</button>
+          <button class="btn secondary" id="how">¿Cómo se juega?</button>
+        </div>
+      </div>
+      <aside class="card" style="padding:14px;background:var(--glass);backdrop-filter:blur(6px)">
+        <div class="badge">🏆 Puntuación total: <strong id="score">0</strong> / 50</div>
+        <p class="lead" style="margin:8px 0 0">Completa los 5 apartados. Al finalizar, genera tu resumen y compártelo.</p>
+      </aside>
+    </section>
+
+    <!-- STEP 1 -->
+    <section class="step card" id="step-1">
+      <div style="padding:16px">
+        <h3>1) ES REAL · Arrastra: ¿TIEMPO o CLIMA?</h3>
+        <p class="lead">Clasifica cada tarjeta. Recuerda: el <strong>tiempo</strong> es a corto plazo; el <strong>clima</strong> es la tendencia calculada con medias a <strong>30 años</strong>.</p>
+        <div class="dnd">
+          <div class="bank" id="bank1" aria-label="Banco de tarjetas"></div>
+          <div class="zones">
+            <div class="zone" id="zone-tiempo" data-accept="tiempo" aria-label="Zona TIEMPO"><h4>🕒 TIEMPO (corto plazo)</h4></div>
+            <div class="zone" id="zone-clima" data-accept="clima" aria-label="Zona CLIMA"><h4>🌍 CLIMA (tendencia 30 años)</h4></div>
+          </div>
+        </div>
+        <div class="nav">
+          <div class="badge">Puntos en este apartado: <strong id="p1">0</strong> / 10</div>
+          <div>
+            <button class="btn secondary" data-back>Volver</button>
+            <button class="btn" id="check1">Comprobar</button>
+            <button class="btn" data-next disabled>Continuar ▶</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2 -->
+    <section class="step card" id="step-2">
+      <div style="padding:16px">
+        <h3>2) SOMOS NOSOTRAS · Empareja conceptos clave</h3>
+        <p class="lead">Une cada concepto con su definición breve sobre <strong>efecto invernadero</strong> y <strong>gases</strong>.</p>
+        <div class="match">
+          <div class="list" id="left2"></div>
+          <div class="list" id="right2"></div>
+        </div>
+        <div class="nav">
+          <div class="badge">Puntos en este apartado: <strong id="p2">0</strong> / 10</div>
+          <div>
+            <button class="btn secondary" data-back>◀ Atrás</button>
+            <button class="btn" id="reset2">Reiniciar</button>
+            <button class="btn" data-next disabled>Continuar ▶</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3 -->
+    <section class="step card" id="step-3">
+      <div style="padding:16px">
+        <h3>3) CONSENSO CIENTÍFICO · Quiz</h3>
+        <p class="lead">Responde a las preguntas sobre el IPCC y el consenso científico.</p>
+        <div class="quiz" id="quiz3"></div>
+        <div class="nav">
+          <div class="badge">Puntos en este apartado: <strong id="p3">0</strong> / 10</div>
+          <div>
+            <button class="btn secondary" data-back>◀ Atrás</button>
+            <button class="btn" id="check3">Corregir</button>
+            <button class="btn" data-next disabled>Continuar ▶</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 4 -->
+    <section class="step card" id="step-4">
+      <div style="padding:16px">
+        <h3>4) ES MALA · Memory de impactos</h3>
+        <p class="lead">Encuentra las parejas. Impactos en biodiversidad, salud y el sistema terrestre.</p>
+        <div class="grid" id="grid4"></div>
+        <div class="nav">
+          <div class="badge">Puntos en este apartado: <strong id="p4">0</strong> / 10</div>
+          <div>
+            <button class="btn secondary" data-back>◀ Atrás</button>
+            <button class="btn" id="reset4">Reiniciar</button>
+            <button class="btn" data-next disabled>Continuar ▶</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 5 -->
+    <section class="step card" id="step-5">
+      <div style="padding:16px">
+        <h3>5) HAY ESPERANZA · Dos verdades y un bulo</h3>
+        <p class="lead">En cada ronda, pulsa el <strong>bulo</strong> sobre soluciones climáticas. 5 rondas · 2 puntos por acierto (máx. 10).</p>
+        <div class="tvb">
+          <div class="roundBox">
+            <div id="r5-title"><strong>Ronda 1</strong> — Señala el bulo</div>
+            <div class="choices" id="r5-choices"></div>
+            <div class="actions" style="margin-top:10px">
+              <button class="btn secondary" id="r5-next" disabled>Siguiente ronda ▶</button>
+            </div>
+          </div>
+        </div>
+        <div class="nav">
+          <div class="badge">Puntos en este apartado: <strong id="p5">0</strong> / 10</div>
+          <div>
+            <button class="btn secondary" data-back>◀ Atrás</button>
+            <button class="btn" id="finish" disabled>Finalizar y ver resultados</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section class="step card" id="step-6">
+      <div style="padding:18px">
+        <h3>🎉 ¡Resultados!</h3>
+        <p class="lead">Puntuación total: <strong id="finalScore">0</strong> / 50 · Nivel: <strong id="level"></strong></p>
+        <ul id="summary" style="line-height:1.6"></ul>
+        <div class="actions" style="margin-top:10px">
+          <button class="btn" id="print">Imprimir / PDF</button>
+          <button class="btn secondary" id="restart">Jugar de nuevo</button>
+        </div>
+        <p class="lead" style="margin-top:10px;color:#9ca3af">Consejo: habla de lo aprendido y súmate a iniciativas colectivas. ¡Cada conversación suma!</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast">✔ Guardado</div>
+</div>
+
+<script>
+(function(){
+  const $ = s => document.querySelector(s); const $$ = s => Array.from(document.querySelectorAll(s));
+  const state = { score:0, steps:[false,false,false,false,false], perStep:[0,0,0,0,0] };
+  const updateUI = () => {
+    $('#score').textContent = state.score;
+    const done = state.steps.filter(Boolean).length;
+    $('#bar').style.width = (done/5*100)+'%';
+    $$('#steps .dot').forEach((d,i)=> d.classList.toggle('done', state.steps[i]));
+  };
+  const toast = (msg) => { const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1400); };
+  const confetti = () => {
+    const colors=['#fde047','#a7f3d0','#93c5fd','#fca5a5','#f9a8d4'];
+    for(let i=0;i<150;i++){
+      const el=document.createElement('i'); el.className='confetti';
+      el.style.left=Math.random()*100+'vw';
+      el.style.background=colors[Math.floor(Math.random()*colors.length)];
+      el.style.transform=`translateY(0) rotate(${Math.random()*360}deg)`;
+      el.style.animationDelay=(Math.random()*0.6)+'s';
+      el.style.width=(6+Math.random()*6)+'px'; el.style.height=(10+Math.random()*10)+'px';
+      document.body.appendChild(el); setTimeout(()=>el.remove(),2600);
+    }
+  };
+
+  const showIntro = ()=>{ $$('.step').forEach(s=>s.classList.remove('active')); window.scrollTo({top:0,behavior:'smooth'}); };
+  const go = n => { if(n===0){ showIntro(); return; } $$('.step').forEach(s=>s.classList.remove('active')); $('#step-'+n)?.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); };
+  $('#start').addEventListener('click', ()=> go(1));
+  $('#how').addEventListener('click', ()=> alert('Supera los 5 minijuegos. Cada uno vale 10 puntos. ¡Al final podrás imprimir tu resultado!'));
+  $$('.step [data-back]').forEach(b=> b.addEventListener('click', (e)=>{ const step = +e.target.closest('.step').id.split('-')[1]; if(step>1) go(step-1); else showIntro(); }));
+
+  /* STEP 1: Drag & Drop */
+  const cards1 = [
+    {t:'Ola de frío en tu ciudad esta semana.',a:'tiempo'},
+    {t:'Pronóstico de mañana: 80% lluvia.',a:'tiempo'},
+    {t:'Tendencia de la temperatura media (1991–2020).',a:'clima'},
+    {t:'Nevada intensa un día concreto.',a:'tiempo'},
+    {t:'Anomalía mensual de temperatura global.',a:'clima'},
+    {t:'Media de precipitación anual de 30 años.',a:'clima'},
+    {t:'Rayas #ShowYourStripes (1850–2022).',a:'clima'},
+    {t:'Viento fuerte esta tarde.',a:'tiempo'}
+  ];
+  const bank1 = $('#bank1');
+  cards1.sort(()=>Math.random()-0.5).forEach((c,i)=>{
+    const el=document.createElement('div'); el.className='draggable'; el.draggable=true; el.textContent=c.t; el.dataset.answer=c.a; el.id='d1-'+i;
+    el.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain', el.id));
+    bank1.appendChild(el);
+  });
+  $$('.zone').forEach(z=>{
+    z.addEventListener('dragover', e=>{e.preventDefault(); z.style.background='rgba(34,197,94,.08)'});
+    z.addEventListener('dragleave', ()=> z.style.background='rgba(255,255,255,.03)');
+    z.addEventListener('drop', e=>{e.preventDefault(); z.style.background='rgba(255,255,255,.03)'; const id=e.dataTransfer.getData('text/plain'); const el=$('#'+id); if(el) z.appendChild(el);});
+  });
+  $('#check1').addEventListener('click', ()=>{
+    let correct=0, total=cards1.length; [$('#zone-tiempo'),$('#zone-clima')].forEach(z=>z.classList.remove('correct','wrong'));
+    $$('#zone-tiempo .draggable').forEach(d=>{ if(d.dataset.answer==='tiempo') correct++; });
+    $$('#zone-clima .draggable').forEach(d=>{ if(d.dataset.answer==='clima') correct++; });
+    const pts = Math.round((correct/total)*10);
+    state.perStep[0]=pts; $('#p1').textContent=pts;
+    const ok = correct===total; $('#step-1 [data-next]').disabled=!ok;
+    if(ok){ if(!state.steps[0]){ state.score+=pts; state.steps[0]=true; confetti(); toast('¡Perfecto! Tiempo ≠ Clima'); } }
+    updateUI();
+  });
+
+  /* STEP 2: Match pairs */
+  const pairs2 = [
+    {k:'co2', left:'CO₂ (dióxido de carbono)', right:'Gas de efecto invernadero más abundante; ~la mitad del calentamiento total.'},
+    {k:'ch4', left:'CH₄ (metano)', right:'Potente gas de efecto invernadero, menos abundante que el CO₂.'},
+    {k:'ghg', left:'Efecto invernadero', right:'La atmósfera retiene parte de la radiación de onda larga emitida por la Tierra.'},
+    {k:'co2eq', left:'CO₂ equivalente', right:'Forma de comparar gases distintos usando el CO₂ como referencia.'}
+  ];
+  const L=$('#left2'), R=$('#right2');
+  const shuffle = arr => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
+  const fill2 = ()=>{
+    L.innerHTML=''; R.innerHTML='';
+    shuffle([...pairs2]).forEach(p=>{ const el=document.createElement('div'); el.className='item'; el.textContent=p.left; el.dataset.key=p.k; L.appendChild(el); });
+    shuffle([...pairs2]).forEach(p=>{ const el=document.createElement('div'); el.className='item'; el.textContent=p.right; el.dataset.key=p.k; R.appendChild(el); });
+  };
+  fill2();
+  let pickL=null, pickR=null, matched2=new Set();
+  const update2 = ()=>{
+    const done = matched2.size===pairs2.length; $('#step-2 [data-next]').disabled=!done; if(done && !state.steps[1]){ state.perStep[1]=10; $('#p2').textContent=10; state.score+=10; state.steps[1]=true; confetti(); toast('¡Emparejado!'); updateUI(); }
+  };
+  const onClickItem = (el, side)=>{
+    if(el.classList.contains('matched')) return;
+    if(side==='L'){ if(pickL) pickL.classList.remove('active'); pickL=el; el.classList.add('active'); }
+    else{ if(pickR) pickR.classList.remove('active'); pickR=el; el.classList.add('active'); }
+    if(pickL && pickR){ if(pickL.dataset.key===pickR.dataset.key){ matched2.add(pickL.dataset.key); [pickL,pickR].forEach(x=>{x.classList.add('matched'); x.classList.remove('active');}); pickL=null; pickR=null; }
+      else{ const a=pickL,b=pickR; setTimeout(()=>{a.classList.remove('active'); b.classList.remove('active'); pickL=null; pickR=null;},350); }
+      update2();
+    }
+  };
+  L.addEventListener('click', e=>{ const el=e.target.closest('.item'); if(el) onClickItem(el,'L'); });
+  R.addEventListener('click', e=>{ const el=e.target.closest('.item'); if(el) onClickItem(el,'R'); });
+  $('#reset2').addEventListener('click', ()=>{ matched2.clear(); pickL=null; pickR=null; fill2(); state.perStep[1]=0; $('#p2').textContent=0; $('#step-2 [data-next]').disabled=true; });
+
+  /* STEP 3: Quiz */
+  const qs = [
+    {q:'¿Qué hace el IPCC?', opts:[
+      'Investiga desde cero y realiza experimentos climáticos propios',
+      'Sintetiza la ciencia publicada y elabora informes de evaluación',
+      'Es un grupo de activistas, no de científicos'], a:1},
+    {q:'¿Qué afirmó el Informe de Síntesis 2023?', opts:[
+      'Aún no hay evidencia suficiente del calentamiento',
+      'El calentamiento 2011–2020 fue de ~1.1°C y es inequívocamente causado por actividades humanas',
+      'El sol es la causa principal del calentamiento actual'], a:1},
+    {q:'¿Cuántos Grupos de Trabajo principales tiene el IPCC?', opts:['2','3','5'], a:1},
+    {q:'Las personas autoras y revisoras del IPCC…', opts:['Cobran por participar','Participan de forma altruista','Solo son de un país'], a:1},
+    {q:'El consenso científico en literatura revisada por pares sobre la causa humana del CC es…', opts:['~60%','~85%','>99%'], a:2}
+  ];
+  const quizC = $('#quiz3');
+  qs.forEach((o,i)=>{
+    const q=document.createElement('div'); q.className='q'; q.innerHTML=`<h4>${i+1}. ${o.q}</h4>`;
+    o.opts.forEach((t,j)=>{ const row=document.createElement('label'); row.className='opt';
+      row.innerHTML=`<input type="radio" name="q${i}" value="${j}"> ${t} <span class="mark" id="mark_q${i}_${j}"></span>`; q.appendChild(row); });
+    quizC.appendChild(q);
+  });
+  $('#check3').addEventListener('click', ()=>{
+    let correct=0; qs.forEach((o,i)=>{ const sel=$(`input[name='q${i}']:checked`); const idx=sel?+sel.value:-1; $$("#quiz3 .mark").forEach(m=>m.style.background=''); if(idx===o.a) correct++; const mk = $(`#mark_q${i}_${idx}`); if(mk) mk.style.background = (idx===o.a? '#22c55e':'#ef4444'); });
+    const pts=Math.round((correct/qs.length)*10); state.perStep[2]=pts; $('#p3').textContent=pts; const all=correct===qs.length; $('#step-3 [data-next]').disabled=!all; if(all && !state.steps[2]){ state.score+=pts; state.steps[2]=true; confetti(); toast('¡Pleno!'); } updateUI();
+  });
+
+  /* STEP 4: Memory */
+  const pairs4 = [
+    {k:'bio', t:'🌿 Biodiversidad', d:'Cambios de distribución y fenología; mayor vulnerabilidad'},
+    {k:'salud', t:'🩺 Salud', d:'Calor extremo, vectores y salud mental'},
+    {k:'tip', t:'⚠️ Puntos de inflexión', d:'Umbrales que pueden generar efectos en cascada'},
+    {k:'lim', t:'🌍 Límites planetarios', d:'6 de 9 ya transgredidos'}
+  ];
+  const mkDeck = ()=>{
+    const deck=[...pairs4.map(p=>({k:p.k,side:'t',label:p.t})),...pairs4.map(p=>({k:p.k,side:'d',label:p.d}))].map(v=>({r:Math.random(),...v})).sort((a,b)=>a.r-b.r);
+    const grid=$('#grid4'); grid.innerHTML=''; deck.forEach((c)=>{
+      const card=document.createElement('div'); card.className='cardM'; card.dataset.key=c.k; card.dataset.side=c.side;
+      card.innerHTML=`<div class="face front">❖</div><div class="face back">${c.label}</div>`; grid.appendChild(card);
+    });
+  }
+  mkDeck();
+  let open=[], matched4=new Set();
+  $('#grid4').addEventListener('click', e=>{
+    const card=e.target.closest('.cardM'); if(!card || card.classList.contains('matched')) return;
+    if(open.includes(card)) return; card.classList.add('flipped'); open.push(card);
+    if(open.length===2){ const [a,b]=open; const match = a.dataset.key===b.dataset.key && a.dataset.side!==b.dataset.side; setTimeout(()=>{
+      if(match){ a.classList.add('matched'); b.classList.add('matched'); matched4.add(a.dataset.key); if(matched4.size===pairs4.length){ if(!state.steps[3]){ state.perStep[3]=10; $('#p4').textContent=10; state.score+=10; state.steps[3]=true; $('#step-4 [data-next]').disabled=false; confetti(); toast('¡Memoria climática desbloqueada!'); updateUI(); } }
+      }else{ a.classList.remove('flipped'); b.classList.remove('flipped'); }
+      open=[]; }, 550);
+    }
+  });
+  $('#reset4').addEventListener('click', ()=>{ matched4.clear(); open=[]; mkDeck(); state.perStep[3]=0; $('#p4').textContent=0; $('#step-4 [data-next]').disabled=true; });
+
+  /* STEP 5: Dos verdades y un bulo */
+  const rounds5 = [
+    {opts:[
+      {t:'Vivir sin coche particular reduce mucho la huella de carbono.', bulo:false},
+      {t:'Reciclar y cambiar bombillas son las acciones MÁS efectivas para bajar emisiones.', bulo:true},
+      {t:'Evitar un vuelo transatlántico puede recortar tu huella anual de forma notable.', bulo:false}
+    ]},
+    {opts:[
+      {t:'La crisis climática se arregla solo reduciendo CO₂; lo demás es secundario.', bulo:true},
+      {t:'Además de mitigar CO₂, hay que abordar biodiversidad, contaminación y desigualdad.', bulo:false},
+      {t:'Evitar la “visión de túnel de carbono” mejora la toma de decisiones.', bulo:false}
+    ]},
+    {opts:[
+      {t:'La ciudadanía no pinta nada: todo depende de empresas y gobiernos.', bulo:true},
+      {t:'La participación ciudadana y el activismo colectivo son palancas clave.', bulo:false},
+      {t:'Apoyar políticas ambiciosas (COP y ámbito local) acelera la transición.', bulo:false}
+    ]},
+    {opts:[
+      {t:'La esperanza es esperar a que otras personas solucionen el problema.', bulo:true},
+      {t:'La esperanza se trabaja: acción sostenida y cuidados para mantener el esfuerzo.', bulo:false},
+      {t:'Cuidarnos (autocuidado y cuidados compartidos) sostiene el compromiso a largo plazo.', bulo:false}
+    ]},
+    {opts:[
+      {t:'Comprar un coche eléctrico siempre es mejor que no tener coche.', bulo:true},
+      {t:'Pasar de coche eléctrico a no tener coche reduce aún más la huella del transporte.', bulo:false},
+      {t:'Contratar energía 100% renovable descarboniza tu consumo eléctrico.', bulo:false}
+    ]},
+  ];
+  let r5Index=0, r5Score=0, r5Answered=0;
+  const r5Title=$('#r5-title'); const r5Choices=$('#r5-choices'); const r5Next=$('#r5-next');
+  const renderRound5 = ()=>{
+    r5Next.disabled=true; r5Choices.innerHTML='';
+    const round = rounds5[r5Index];
+    const options = round.opts.map(o=>({r:Math.random(),...o})).sort((a,b)=>a.r-b.r);
+    r5Title.innerHTML = `<strong>Ronda ${r5Index+1}</strong> — Señala el bulo`;
+    options.forEach((o)=>{
+      const btn=document.createElement('button'); btn.type='button'; btn.className='choice'; btn.textContent=o.t; btn.addEventListener('click',()=>{
+        if(btn.classList.contains('correct')||btn.classList.contains('wrong')) return;
+        if(o.bulo){ btn.classList.add('correct'); r5Score+=2; toast('¡Bien! Has cazado el bulo.'); }
+        else { btn.classList.add('wrong'); toast('No es bulo. Sigue observando con lupa.'); }
+        r5Answered++; $$('#r5-choices .choice').forEach(c=>c.disabled=true);
+        r5Next.disabled=false; $('#p5').textContent=r5Score; state.perStep[4]=r5Score; });
+      r5Choices.appendChild(btn);
+    });
+  };
+  renderRound5();
+  r5Next.addEventListener('click',()=>{
+    if(r5Index < rounds5.length-1){ r5Index++; renderRound5(); }
+    if(r5Index === rounds5.length-1){ r5Next.textContent='Última ronda'; }
+    if(r5Index === rounds5.length-1 && r5Answered>=rounds5.length){ $('#finish').disabled=false; }
+    if(r5Answered>=rounds5.length){ $('#finish').disabled=false; if(!state.steps[4]){ state.steps[4]=true; state.score += state.perStep[4]; updateUI(); if(state.perStep[4]===10){ confetti(); } }
+    }
+  });
+
+  /* Nav next buttons */
+  $$('.step [data-next]').forEach(b=> b.addEventListener('click', ()=>{ const cur=parseInt(b.closest('.step').id.split('-')[1]); go(cur+1); }));
+
+  /* Finish */
+  $('#finish').addEventListener('click', ()=>{
+    // Asegura sumar puntos de pasos previos si no se habían marcado como completados
+    for(let i=0;i<4;i++){ if(!state.steps[i]){ state.score+=state.perStep[i]; state.steps[i]=true; } }
+    updateUI();
+    const total = state.perStep.reduce((a,b)=>a+b,0); $('#finalScore').textContent= total; 
+    const lvl = total>=45? '🌟 Aliado/a del Clima (Oro)': total>=35? '🌿 Defensor/a (Plata)': total>=25? '🌱 Explorador/a (Bronce)':'💡 En marcha';
+    $('#level').textContent=lvl; 
+    const li = (t,v)=>`<li>• ${t}: <strong>${v}/10</strong></li>`;
+    $('#summary').innerHTML = [
+      li('1) Es real', state.perStep[0]),
+      li('2) Somos nosotras', state.perStep[1]),
+      li('3) Consenso científico', state.perStep[2]),
+      li('4) Es mala', state.perStep[3]),
+      li('5) Hay esperanza', state.perStep[4])
+    ].join('');
+    confetti(); go(6);
+  });
+
+  /* Print & restart */
+  $('#print').addEventListener('click', ()=> window.print());
+  $('#restart').addEventListener('click', ()=> location.reload());
+
+  // Start with intro visible
+  showIntro();
+  updateUI();
+})();
+</script>
+</body>
+</html>
 
