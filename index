@@ -115,10 +115,38 @@
   @media (max-width:900px){
     .hero{grid-template-columns:1fr}
   }
+  /* Modal “Cómo se juega” */
+  .modalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:50}
+  .modalBackdrop.open{opacity:1;pointer-events:auto}
+  .modalBox{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.98);width:min(92vw,760px);max-height:80vh;overflow:auto;background:var(--card);border:1px solid rgba(255,255,255,.14);border-radius:16px;box-shadow:var(--shadow);padding:16px;transition:transform .25s ease}
+  .modalBackdrop.open .modalBox{transform:translate(-50%,-50%) scale(1)}
+  .modalHeader{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .closeBtn{border:none;background:transparent;color:var(--text);font-size:20px;line-height:1;cursor:pointer}
+  .modalBody{color:var(--text);}
 </style>
 </head>
 <body>
 <div id="app">
+  <!-- Modal Cómo se juega -->
+  <div class="modalBackdrop" id="howModal" aria-hidden="true">
+    <div class="modalBox" role="dialog" aria-modal="true" aria-labelledby="how-title" tabindex="-1">
+      <div class="modalHeader">
+        <h3 id="how-title" style="margin:0">¿Cómo se juega?</h3>
+        <button type="button" class="closeBtn" id="howClose" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modalBody">
+        <p>Supera 5 minijuegos. Cada uno vale <strong>10 puntos</strong> (total 50). Al final, genera tu resumen.</p>
+        <ol>
+          <li><strong>Es real:</strong> Arrastra tarjetas a <em>TIEMPO</em> o <em>CLIMA</em>.</li>
+          <li><strong>Somos nosotras:</strong> Empareja conceptos y definiciones.</li>
+          <li><strong>Consenso científico:</strong> Responde el quiz.</li>
+          <li><strong>Es mala:</strong> Memory de impactos. Las parejas correctas quedan en <strong>verde</strong> con ✓.</li>
+          <li><strong>Hay esperanza:</strong> En cada ronda, pulsa el <strong>bulo</strong>.</li>
+        </ol>
+        <p style="color:#cbd5e1;font-size:14px">Accesibilidad: cierra con <kbd>Esc</kbd>, clic fuera o el botón ✕. Compatible con teclado.</p>
+      </div>
+    </div>
+  </div>
   <header>
     <div class="container">
       <div class="title">
@@ -308,7 +336,15 @@
   const showIntro = ()=>{ $$('.step').forEach(s=>s.classList.remove('active')); window.scrollTo({top:0,behavior:'smooth'}); };
   const go = n => { if(n===0){ showIntro(); return; } $$('.step').forEach(s=>s.classList.remove('active')); $('#step-'+n)?.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); };
   $('#start').addEventListener('click', ()=> go(1));
-  $('#how').addEventListener('click', ()=> alert('Supera los 5 minijuegos. Cada uno vale 10 puntos. ¡Al final podrás imprimir tu resultado!'));
+  const howBtn = $('#how');
+  const howModal = $('#howModal');
+  const howClose = $('#howClose');
+  const openHow = ()=>{ if(!howModal) return; howModal.classList.add('open'); howModal.setAttribute('aria-hidden','false'); howModal.querySelector('.modalBox')?.focus(); };
+  const closeHow = ()=>{ if(!howModal) return; howModal.classList.remove('open'); howModal.setAttribute('aria-hidden','true'); howBtn?.focus(); };
+  howBtn?.addEventListener('click', (e)=>{ e.preventDefault(); openHow(); });
+  howClose?.addEventListener('click', closeHow);
+  howModal?.addEventListener('click', (e)=>{ if(e.target===howModal) closeHow(); });
+  window.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && howModal?.classList.contains('open')) closeHow(); });
   $$('.step [data-back]').forEach(b=> b.addEventListener('click', (e)=>{ const step = +e.target.closest('.step').id.split('-')[1]; if(step>1) go(step-1); else showIntro(); }));
 
   /* STEP 1: Drag & Drop */
@@ -516,4 +552,3 @@
 </script>
 </body>
 </html>
-
